@@ -1,5 +1,8 @@
 # Weather
 Simple Weather Station
+Based on script from this article:
+https://blog.avislab.com/raspberry-pi-meteo_ru/
+
 Script for Raspberry Pi to log environment data and generate htm file with graphs of:
   temperature and humidity from two BME280 sensors, 
   pressure from one of them, 
@@ -8,10 +11,7 @@ Script for Raspberry Pi to log environment data and generate htm file with graph
 Graphs generated for day, week and month.
 You can check out printscreen here in folder 'pictures'
 
-Based on script from this article:
-https://blog.avislab.com/raspberry-pi-meteo_ru/
-
-Added:
+In this fork added:
 - second BME280 sensor (indoor)
 - co2 sensor
 - graph of temperature difference
