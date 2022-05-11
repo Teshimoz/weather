@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Original from http://www.avislab.com/blog/raspberry-pi-meteo_ru/
+# Original descrided in article here http://www.avislab.com/blog/raspberry-pi-meteo_ru/
 # Edited by Teshimoz - 2018, 2019, 2022
 
 import sqlite3
@@ -9,7 +9,7 @@ import time
 import datetime
 import re
 import os
-import openwin, closewin
+# import openwin, closewin # options to open and close the window, if connected
 from BME280 import *
 from BME281 import *
 
@@ -23,7 +23,7 @@ import subprocess
 #========================================
 home_dir = "/home/pi/weather/"
 www_dir = "/var/www/html/weather/"
-delete_data_older_than_days = 365
+delete_data_older_than_days = 365 # increased from 30 in original version
 temperature_unit = 'C' # 'C' | 'F'
 pressure_unit = 'mm Hg' # 'Pa' | 'mm Hg'
 humidity_unit = '%'
