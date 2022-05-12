@@ -12,12 +12,12 @@ Graphs generated for day, week and month.
 You can check out printscreen here in folder 'pictures'
 
 In this fork added:
-- second BME280 sensor (indoor)
-- co2 sensor
+- second BME280 sensor (indoor), the file BME280.py updated accordingly
+- co2 sensor (have to install mh-z19: pip install mh-z19)
 - graph of temperature difference
 - visualization of indoor and outdoor data on same graph
 - mean values for each period and type
-- data fixer for power outage
+- data fixer for power outage (test for now)
 - option to update final htm file by compact function in script to get more flexibility 
 - option to connect rain sensor and log it's status
 
