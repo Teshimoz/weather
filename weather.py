@@ -4,15 +4,11 @@
 # Edited by Teshimoz - 2018, 2019, 2022
 
 import sqlite3
-import urllib2
 import time
 import datetime
 import re
 import os
-# import openwin, closewin # options to open and close the window, if connected
 from BME280 import *
-from BME281 import *
-
 # for raincheck
 import RPi.GPIO as GPIO
 # for co2 input
@@ -22,7 +18,8 @@ import subprocess
 # Settings
 #========================================
 home_dir = "/home/pi/weather/"
-www_dir = "/var/www/html/weather/"
+www_dir = "/var/www/html/weather/" # this worked on Stretch and Bullseye 
+# www_dir = "/var/www/weather/"
 delete_data_older_than_days = 365 # increased from 30 in original version
 temperature_unit = 'C' # 'C' | 'F'
 pressure_unit = 'mm Hg' # 'Pa' | 'mm Hg'
@@ -47,7 +44,7 @@ co2_field = 'co2'
 units = {temperature_field: temperature_unit, temperature_field_indoor: temperature_unit_indoor, pressure_field: pressure_unit, humidity_field: humidity_unit, humidity_field_indoor: humidity_unit_indoor, temperature_field_delta: temperature_unit_delta, rainstate_field: rainstate_unit, co2_field: co2_unit}
 
 def convert(value, unit):
-      	if unit == 'F':
+	if unit == 'F':
 		# Convert from Celsius to Fahrenheit
 		return round(1.8 * value + 32.0, 2)
 	if unit == 'mm Hg':
@@ -133,27 +130,27 @@ general_fields_list = [temperature_field,
 
 # Read data from Sensors
 print(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-ps = BME280()
-ps_data = ps.get_data()
-t_out = convert(ps_data['t'], units[temperature_field])
-print "Temperature outdoor:", t_out, "°"+units[temperature_field], "Pressure:", convert(ps_data['p'], units[pressure_field]), units[pressure_field], "Humidity:", ps_data['h'], units[humidity_field]
+ps = BME280('outdoor')
+ps_data = ps.get_data('outdoor')
+t_out = round(convert(ps_data['t'], units[temperature_field]), 2)
+print("Temperature outdoor:", t_out, "°"+units[temperature_field], "Pressure:", convert(ps_data['p'], units[pressure_field]), units[pressure_field], "Humidity:", ps_data['h'], units[humidity_field])
 
-ps_indoor = BME281()
-ps_indoor_data = ps_indoor.get_data()
-t_in = convert(ps_indoor_data['t1'], units[temperature_field_indoor])
-print "Temperature indoor: ", t_in, "°"+units[temperature_field_indoor], "Pressure:", convert(ps_indoor_data['p1'], units[pressure_field]), units[pressure_field], "Humidity:", ps_indoor_data['h1'], units[humidity_field_indoor]
+ps_indoor = BME280('indoor')
+ps_indoor_data = ps_indoor.get_data('indoor')
+t_in = round(convert(ps_indoor_data['t1'], units[temperature_field_indoor]), 2)
+print("Temperature indoor: ", t_in, "°"+units[temperature_field_indoor], "Pressure:", convert(ps_indoor_data['p1'], units[pressure_field]), units[pressure_field], "Humidity:", ps_indoor_data['h1'], units[humidity_field_indoor])
 
 # calculation of temperature difference between inside and outside
-delta = t_in - t_out
-print "Delta temperature:   ",delta, "°"+units[temperature_field_delta], "(= indoor - outdoor)"
+delta = round(t_in - t_out, 2)
+print("Delta temperature:   ",delta, "°"+units[temperature_field_delta], "(= indoor - outdoor)")
 # actions by temperature delta
 if delta > .5:
-    print "Delta > 0.5 °"+units[temperature_field_delta],", keep your windows open"
+    print("Delta > 0.5 °"+units[temperature_field_delta],", keep your windows open")
 else:
     if delta < -.5:
-        print "Delta < -0.5 °"+units[temperature_field_delta],", close window, keep your coolness"
+        print("Delta < -0.5 °"+units[temperature_field_delta],", close window, keep your coolness")
     else:
-        print "-0.5 < Delta < 0.5 °"+units[temperature_field_delta],", same same"
+        print("-0.5 < Delta < 0.5 °"+units[temperature_field_delta],", same same")
 
 # rainckeck
 GPIO.setmode(GPIO.BOARD)
@@ -162,12 +159,12 @@ rainstate = GPIO.input(7)
 rainstate = (rainstate - 1) ** 2
 
 # CO2 data input
-cmd = [ 'sudo', 'python2' ,'-m', 'mh_z19' ]
+cmd = [ 'sudo', 'python' ,'-m', 'mh_z19' ]
 try:
-	co2 = int(subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0].split(' ')[1].replace("}", ""))
+	co2 = int(subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0].decode("utf-8").split(' ')[1].replace("}", ""))
 except:
-	co2 = 0
-print 'CO2 level:',co2, 'ppm'
+	co2 = 800
+print('CO2 level:',co2, 'ppm')
 
 # Connect to database
 con = sqlite3.connect(home_dir + database_name)
@@ -179,9 +176,14 @@ time_now = time.time()
 
 SQL = "SELECT id FROM weather ORDER BY id DESC LIMIT 1".format()
 cur.execute(SQL)
-last_id = cur.fetchone()[-1]
+
+# for test of poweroff writing wrong values
+try:
+	last_id = cur.fetchone()[-1]
+except:
+	last_id = 0 # test
 if time_now > last_id:
-    #write a data
+	#write a data
 	SQL = "INSERT INTO weather VALUES({0}, '{1}', {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9})".format(time_now,
 																								  ps_data['t'],
 																								  ps_data['p'],
@@ -193,7 +195,7 @@ if time_now > last_id:
 	cur.execute(SQL)
 	con.commit()
 else:
-    pass 
+    pass
 
 # Delete data older than X days
 start_time =  time.time() - 86400 * delete_data_older_than_days
@@ -342,3 +344,12 @@ f.close()
 
 # Database connection close
 con.close()
+
+# Write file test
+# way = '/home/pi/weather/leds_log.txt'
+# file = open('/home/pi/weather/leds_log.txt', 'w')
+# table = [1,2,3,4,5]
+# for row in table:
+#     file.write(str(row))
+# file.close()
+# print('\nTable saved at ' + way)
