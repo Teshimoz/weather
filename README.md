@@ -12,6 +12,7 @@ Graphs generated for day, week and month.
 You can check out printscreen here in folder 'pictures'
 
 In this fork added:
+- adapted for python 3
 - second BME280 sensor (indoor), the file BME280.py updated accordingly
 - co2 sensor (have to install mh-z19: pip install mh-z19)
 - graph of temperature difference
