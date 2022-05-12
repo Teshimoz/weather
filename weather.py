@@ -344,12 +344,3 @@ f.close()
 
 # Database connection close
 con.close()
-
-# Write file test
-# way = '/home/pi/weather/leds_log.txt'
-# file = open('/home/pi/weather/leds_log.txt', 'w')
-# table = [1,2,3,4,5]
-# for row in table:
-#     file.write(str(row))
-# file.close()
-# print('\nTable saved at ' + way)
