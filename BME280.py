@@ -83,9 +83,14 @@ BME280_CONTROL_HUM_SET = BME280_OVERS_H2
 BME280_CONFIG_SET        = (BME280_TSB_0_5 | BME280_FILTER_COEFFICIENT16 | BME280_SPI_OFF)
 
 class BME280(object):
-	def __init__(self, port=1, address=BME280_I2CADDR):
+
+	def __init__(self, position, port=1):
+		if position == 'outdoor':
+			BME280_I2CADDR = 0x76
+		else:
+			BME280_I2CADDR = 0x77
 		self.bus = smbus.SMBus(port)
-		self.address = address
+		self.address = BME280_I2CADDR
 
 		# Read calibration values
 		self.dig_t1 = self.read_word(BME280_DIG_T1)      # Unsigned
@@ -116,11 +121,11 @@ class BME280(object):
 			self.dig_h6 = 127-self.dig_h6
 
 		# Set Configuration
-                self.write_byte(BME280_CONFIG, BME280_CONFIG_SET)
+		self.write_byte(BME280_CONFIG, BME280_CONFIG_SET)
 		self.write_byte(BME280_CONTROL_HUM, BME280_CONTROL_HUM_SET)
 		self.write_byte(BME280_CONTROL_MEAS, BME280_CONTROL_MEAS_SET)
 
-	def get_data(self):
+	def get_data(self, position):
 		adc_t = self.read_adc_long(BME280_TEMP)
 		adc_p = self.read_adc_long(BME280_PRESSURE)
 		adc_h = self.read_adc_word(BME280_HUMIDITY)
@@ -155,8 +160,10 @@ class BME280(object):
 		else:
 			if(humidity < 0.0):
 				humidity = 0.0
-
-		return {'t':temperature, 'p':pressure, 'h':humidity}
+		if position == 'outdoor':
+			return {'t':temperature, 'p':pressure, 'h':humidity}
+		else:
+			return {'t1':temperature, 'p1':pressure, 'h1':humidity}
 
 	def get_altitude(self, pressure):
 		temp = pressure/101325;
@@ -188,11 +195,11 @@ class BME280(object):
 		val = (val >> 4)
 		return val
 
-        def read_adc_word(self, adr):
-                mbs = self.bus.read_byte_data(self.address, adr)
-                lbs = self.bus.read_byte_data(self.address, adr+1)
-                val = (mbs << 8) + lbs
-                return val
+	def read_adc_word(self, adr):
+		mbs = self.bus.read_byte_data(self.address, adr)
+		lbs = self.bus.read_byte_data(self.address, adr+1)
+		val = (mbs << 8) + lbs
+		return val
 
 	def write_byte(self, adr, byte):
 		self.bus.write_byte_data(self.address, adr, byte)
