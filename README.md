@@ -9,7 +9,7 @@ Script for Raspberry Pi to log environment data and generate htm file with graph
   co2 level from MH-Z19 sensor
   
 Graphs generated for day, week and month.
-You can check out printscreen here in folder 'pictures'
+You can check out screenshots here in folder 'pictures'
 
 In this fork added:
 - adapted for python 3
