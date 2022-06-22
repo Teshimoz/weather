@@ -14,7 +14,7 @@ You can check out screenshots here in folder 'pictures'
 In this fork added:
 - adapted for python 3
 - second BME280 sensor (indoor), the file BME280.py updated accordingly
-- co2 sensor (have to install mh-z19: pip install mh-z19)
+- co2 sensor (have to install mh-z19: `pip install mh-z19`)
 - graph of temperature difference
 - visualization of indoor and outdoor data on same graph
 - mean values for each period and type
